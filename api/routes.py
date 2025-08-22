@@ -1,6 +1,7 @@
-from fastapi import APIRouter
+from fastapi import APIRouter, Header, HTTPException
 from models.recommender_models import RecommenderInput
 from services.recommender_score_feedback_service import RecommenderScoreFeedbackService
+from config.app import settings
 
 router = APIRouter()
 
@@ -11,7 +12,9 @@ def check_health():
     return {"message": "pong!"}
 
 @router.post("/zonas")
-async def search_zonas(data: RecommenderInput):
+async def search_zonas(data: RecommenderInput, apiKey: str = Header(...)):
+    if apiKey != settings.API_KEY:
+        raise HTTPException(status_code=401, detail="Invalid API Key")
     return service.recomendar(
         ciudad=data.ciudad,
         criterios_usuario=data.criterios_usuario

@@ -8,6 +8,7 @@ class Settings:
     VERSION: str = "1.0.0"
     API_PREFIX: str = "/api"
     API_VERSION: str = "v1"
+    API_KEY: str = os.getenv("API_KEY", "")
 
     # Ejemplo de variable de entorno
     DATABASE_URL: str = os.getenv("DATABASE_URL", "sqlite:///./test.db")
