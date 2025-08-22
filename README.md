@@ -7,7 +7,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)  
 [![Status](https://img.shields.io/badge/status-active-success.svg)]()  
 
-La **API de Recomendación de Zonas** permite a los usuarios recibir sugerencias de barrios en una ciudad con base en criterios definidos (por ejemplo, cercanía a centros comerciales).  
+La **HabitAI - API de Recomendación de Zonas Urbanas** permite a los usuarios recibir sugerencias de barrios en una ciudad con base en criterios definidos (por ejemplo, cercanía a centros comerciales).  
 Está construida con **FastAPI** y utiliza modelos de **Machine Learning** para realizar las recomendaciones.  
 
 ---
@@ -26,8 +26,8 @@ Está construida con **FastAPI** y utiliza modelos de **Machine Learning** para 
 1. Clonar el repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/api-recomendacion-zonas.git
-cd api-recomendacion-zonas
+git clone https://github.com/cmarsiglia/habitai.git
+cd habitai
 ```
 
 2. Crear entorno virtual e instalar dependencias:
@@ -55,7 +55,7 @@ uvicorn main:app --reload
 
 ## 📌 Endpoints principales
 
-### 🔹 `POST /recomendar`
+### 🔹 `POST /api/zonas`
 
 Recibe una ciudad y los criterios del usuario, devuelve una lista de barrios recomendados.
 
@@ -71,13 +71,17 @@ Recibe una ciudad y los criterios del usuario, devuelve una lista de barrios rec
 
 #### **Response (ejemplo)**
 ```json
-{
-  "ciudad": "Monteria",
-  "recomendaciones": [
-    {"barrio": "Cantaclaro", "score": 0.87},
-    {"barrio": "Los Ángeles", "score": 0.76}
-  ]
-}
+[
+    {
+        "barrio": "Barrio La Coquera",
+        "ciudad": "Monteria",
+        "dist_parques_km": 0.037894319934476,
+        "dist_colegios_km": 0.31724883521877,
+        "dist_clinicas_km": 0.372417749110466,
+        "dist_centroscom_km": 0.118878664144755,
+        "score": 8.341767962916967
+    }
+]
 ```
 
 ---
@@ -85,7 +89,7 @@ Recibe una ciudad y los criterios del usuario, devuelve una lista de barrios rec
 ## 🧪 Ejemplo en cURL
 
 ```bash
-curl -X POST http://127.0.0.1:8000/recomendar   -H "Content-Type: application/json"   -d '{
+curl -X POST http://127.0.0.1:8000/api/zonas   -H "Content-Type: application/json"   -d '{
     "ciudad": "Monteria",
     "criterios_usuario": {
       "positivos": ["centros comerciales"]
@@ -98,11 +102,14 @@ curl -X POST http://127.0.0.1:8000/recomendar   -H "Content-Type: application/js
 ## 📂 Estructura del proyecto
 
 ```
-api-recomendacion-zonas/
+habitai/
 │── assets/                  # Datasets base
 │── services/                # Servicios de recomendación
 │── models/                  # Modelos Pydantic
 │── main.py                  # Punto de entrada FastAPI
+│── config/                  # Configuración
+│── api/                     # Rutas de la API
+│── tests/                   # Pruebas
 │── requirements.txt         # Dependencias
 │── README.md                # Documentación
 ```
