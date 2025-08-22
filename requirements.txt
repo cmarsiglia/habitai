@@ -1,0 +1,16 @@
+fastapi[standard]
+uvicorn
+pandas
+scikit-learn
+pydantic
+osmnx
+geopandas
+shapely
+geopy
+supabase
+pyproj
+scipy
+
+# Testing
+httpx
+pytest

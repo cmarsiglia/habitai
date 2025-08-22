@@ -1,0 +1,203 @@
+{
+  "name": "My workflow",
+  "nodes": [
+    {
+      "parameters": {
+        "updates": [
+          "message"
+        ],
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegramTrigger",
+      "typeVersion": 1.2,
+      "position": [
+        -528,
+        -192
+      ],
+      "id": "c94a19fc-ee29-45db-8d08-cd6ba3067085",
+      "name": "Telegram Trigger",
+      "webhookId": "9cd37631-9035-4122-9451-898f8c9b59bd",
+      "credentials": {
+        "telegramApi": {
+          "id": "v6MhVTYhlp1LaI6U",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [
+        -384,
+        -32
+      ],
+      "id": "e51b0c51-8f6e-4e66-b61d-c2624d9423a8",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "cXQvcEuGsK9NxcSF",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "chatId": "={{ $('Telegram Trigger').item.json.message.from.id }}",
+        "text": "={{ $json.output }}",
+        "additionalFields": {}
+      },
+      "type": "n8n-nodes-base.telegram",
+      "typeVersion": 1.2,
+      "position": [
+        224,
+        -224
+      ],
+      "id": "ffb26e99-f1e8-45ea-a83b-0737ed043746",
+      "name": "Send a text message",
+      "webhookId": "99494fc7-96d7-473b-b51d-4705fe356384",
+      "credentials": {
+        "telegramApi": {
+          "id": "v6MhVTYhlp1LaI6U",
+          "name": "Telegram account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://0f65aee0857d.ngrok-free.app/api/zonas",
+        "sendHeaders": true,
+        "headerParameters": {
+          "parameters": [
+            {
+              "name": "accept",
+              "value": "application/json"
+            }
+          ]
+        },
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"ciudad\": \"{{ $fromAI('ciudad') }}\",\n  \"criterios_usuario\": {\n    \"positivos\": {{ $fromAI('criterios', array) }}\n  }\n}\n",
+        "options": {},
+        "optimizeResponse": true
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.2,
+      "position": [
+        64,
+        -32
+      ],
+      "id": "227191e6-6265-4b0e-ac83-14bc3cbeea2d",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $json.message.text }}",
+        "options": {
+          "systemMessage": "=Eres un asistente experto en recomendación de zonas urbanas para vivienda ciudades como:\n(\nMonteria,\nMedellin\n) en Colombia.\n\nTu tarea es sugerir barrios adecuados para vivir o invertir, basándote en los criterios de búsqueda del usuario.\nTus respuestas deben ser cortas y sin caracteres especiales, no uses etiquetas markdown.\nSi el usuario de hace preguntas diferentes a propiedades, vivienda o inmuebles indica que solo puedes ayudar buscar las mejores zonas para comprar o alquilar inmuebles.\nNo muestres las lista de ciudades en los mensajes de respuesta.\n\nInstrucciones:\n1. Pregunta el nombre al usuario  o tomalo de los datos en el flujo de la conversacion inicial.\n2. Puedes hacer preguntas para tener mas criterios de busqueda, \n3. Lee los criterios de búsqueda que te envía el usuario.\n4. Filtra los barrios que cumplan mejor con esos criterios.\n5. Ordena las recomendaciones por nivel de coincidencia con las preferencias del usuario.\n6. Devuelve un resumen claro y fácil de entender con:\n   - Nombre del barrio\n   - Razón de la recomendación (ej: “A 5 min de centro comercial y cerca de colegios”)\n   - Distancia aproximada a los puntos de interés\n   - Rango de costo de vida\n   - Percepcion de seguridad por parte de los habitantes(Busca en foros, redes sociales y reddit)\n- Cuando tengas la ciudad y el array de criterios de busqueda del usuario pasalos a la herramimenta en variables(ciudad String y criterios desde 1 a N creterios, ejem:[\"parques\", \"colegios\"]) que se puedan usar para hacer la consulta a un endpoint como herramienta.\n- Por cada busqueda te pueden llegar varios barrios pero solo muestra dos, puedes alternar los barrios que te llegan de la busqueda para darle varias opciones al usuario si quiere consultar con los mismos criterios.\nHerramientas disponibles:\n- Nodo https para consultar los barrios.\n\nFormato de salida:\n🏡 Barrio Recomendado: [barrio]\n📍 Ciudad: [ciudad]\n✅ Razón: [breve descripción]\n📏 Distancias: Parque: [X m], Centro Comercial: [X m], Clínica: [X m]\n💰 Costo de vida: ・・・・・ [bajo, medio o alto]\n👮 Percepcion de seguridad: ・・・・・ [bajo, medio, alto]"
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 2.2,
+      "position": [
+        -224,
+        -288
+      ],
+      "id": "b2b7f382-ad49-419e-82cc-5792e3f4ed8c",
+      "name": "AI Agent HabitAI"
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.message.from.id }}"
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryPostgresChat",
+      "typeVersion": 1.3,
+      "position": [
+        -176,
+        -32
+      ],
+      "id": "c7ca040a-8c70-4bc1-b69c-c0c092d2af7c",
+      "name": "Postgres Chat Memory",
+      "credentials": {
+        "postgres": {
+          "id": "LG4LD1fr1jGSc0Qw",
+          "name": "Postgres account"
+        }
+      }
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "Telegram Trigger": {
+      "main": [
+        [
+          {
+            "node": "AI Agent HabitAI",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent HabitAI",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "HTTP Request": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent HabitAI",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent HabitAI": {
+      "main": [
+        [
+          {
+            "node": "Send a text message",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Postgres Chat Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent HabitAI",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1"
+  },
+  "versionId": "a3d615dc-30c9-4997-8716-5953ccfd7211",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "f631f74175a9ea38d827fa231658e4ac80593613283fbea93fa3a50a9afb3de9"
+  },
+  "id": "Whb7Oa1MAihv0Taw",
+  "tags": []
+}
